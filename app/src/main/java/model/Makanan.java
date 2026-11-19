@@ -53,7 +53,7 @@ public abstract class Makanan {
     
     public abstract String getSumber();
     
-    public abstract int getPemilikId();
+    public abstract Integer getPemilikId();
     
     @Override
     public String toString(){
