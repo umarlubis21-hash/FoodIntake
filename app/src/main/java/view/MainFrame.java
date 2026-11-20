@@ -34,9 +34,8 @@ import java.util.List;
 
 public class MainFrame extends JFrame {
 
-    private final Pengguna pengguna;   // bisa berisi Member atau Admin (polymorphism)
+    private final Pengguna pengguna;
 
-    // Memakai tipe interface, bukan kelas konkret
     private final MakananRepository makananRepo = new MakananDAO();
     private final LogDAO logDao = new LogDAO();
     private final PenggunaDAO penggunaDao = new PenggunaDAO();
@@ -55,7 +54,7 @@ public class MainFrame extends JFrame {
     };
 
     private final JTable tabel = new JTable(tableModel);
-    private final List<Integer> idDetail = new ArrayList<>();   // id detail_log tiap baris tabel
+    private final List<Integer> idDetail = new ArrayList<>();
 
     private final JLabel lblRingkasan = new JLabel(" ");
     private final JProgressBar bar = new JProgressBar(0, 100);
@@ -67,6 +66,7 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(860, 480);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLayout(new BorderLayout(8, 8));
 
         JPanel atas = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));

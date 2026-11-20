@@ -12,8 +12,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -49,15 +51,10 @@ public class RegisterFrame extends JFrame {
             }
         });
 
-        setLayout(new BorderLayout(8, 8));
-
         JLabel judul = new JLabel("Buat Akun Baru", SwingConstants.CENTER);
-        judul.setFont(judul.getFont().deriveFont(Font.BOLD, 18f));
-        judul.setBorder(BorderFactory.createEmptyBorder(14, 8, 0, 8));
-        add(judul, BorderLayout.NORTH);
+        judul.setFont(judul.getFont().deriveFont(Font.BOLD, 20f));
 
         JPanel form = new JPanel(new GridLayout(0, 2, 8, 10));
-        form.setBorder(BorderFactory.createEmptyBorder(12, 20, 8, 20));
         form.add(new JLabel("Nama lengkap"));
         form.add(tfNama);
         form.add(new JLabel("Email"));
@@ -66,7 +63,6 @@ public class RegisterFrame extends JFrame {
         form.add(pfPassword);
         form.add(new JLabel("Ulangi password"));
         form.add(pfKonfirmasi);
-        add(form, BorderLayout.CENTER);
 
         JButton btnDaftar = new JButton("Daftar");
         btnDaftar.addActionListener(e -> daftar());
@@ -76,11 +72,23 @@ public class RegisterFrame extends JFrame {
         JPanel tombol = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         tombol.add(btnDaftar);
         tombol.add(btnBatal);
-        add(tombol, BorderLayout.SOUTH);
+
+        JPanel kartu = new JPanel(new BorderLayout(8, 12));
+        kartu.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(24, 32, 24, 32)));
+        kartu.add(judul, BorderLayout.NORTH);
+        kartu.add(form, BorderLayout.CENTER);
+        kartu.add(tombol, BorderLayout.SOUTH);
+
+        setLayout(new GridBagLayout());
+        add(kartu);
 
         getRootPane().setDefaultButton(btnDaftar);
-        pack();
+
+        setSize(640, 480);                          
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void daftar() {

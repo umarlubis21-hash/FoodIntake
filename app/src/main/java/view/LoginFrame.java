@@ -14,8 +14,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.sql.SQLException;
 
@@ -29,20 +31,15 @@ public class LoginFrame extends JFrame {
     public LoginFrame() {
         super("Food Intake Management - Masuk");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(8, 8));
 
         JLabel judul = new JLabel("Masuk ke Akun Anda", SwingConstants.CENTER);
-        judul.setFont(judul.getFont().deriveFont(Font.BOLD, 18f));
-        judul.setBorder(BorderFactory.createEmptyBorder(14, 8, 0, 8));
-        add(judul, BorderLayout.NORTH);
+        judul.setFont(judul.getFont().deriveFont(Font.BOLD, 20f));
 
         JPanel form = new JPanel(new GridLayout(0, 2, 8, 10));
-        form.setBorder(BorderFactory.createEmptyBorder(12, 20, 8, 20));
         form.add(new JLabel("Email"));
         form.add(tfEmail);
         form.add(new JLabel("Password"));
         form.add(pfPassword);
-        add(form, BorderLayout.CENTER);
 
         JButton btnMasuk = new JButton("Masuk");
         btnMasuk.addActionListener(e -> masuk());
@@ -52,13 +49,25 @@ public class LoginFrame extends JFrame {
         JPanel tombol = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         tombol.add(btnMasuk);
         tombol.add(btnDaftar);
-        add(tombol, BorderLayout.SOUTH);
 
+        JPanel kartu = new JPanel(new BorderLayout(8, 12));
+        kartu.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                BorderFactory.createEmptyBorder(24, 32, 24, 32)));
+        kartu.add(judul, BorderLayout.NORTH);
+        kartu.add(form, BorderLayout.CENTER);
+        kartu.add(tombol, BorderLayout.SOUTH);
+
+        setLayout(new GridBagLayout());
+        add(kartu);
+
+       
         pfPassword.addActionListener(e -> masuk());
         getRootPane().setDefaultButton(btnMasuk);
 
-        pack();
+        setSize(640, 420);                          
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private void masuk() {
