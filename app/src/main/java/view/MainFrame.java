@@ -29,10 +29,12 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainFrame extends JFrame {
 
-    private final Pengguna pengguna;
+    private final Pengguna pengguna;   // bisa berisi Member atau Admin (polymorphism)
 
     // Memakai tipe interface, bukan kelas konkret
     private final MakananRepository makananRepo = new MakananDAO();
@@ -51,6 +53,9 @@ public class MainFrame extends JFrame {
             return false;
         }
     };
+
+    private final JTable tabel = new JTable(tableModel);
+    private final List<Integer> idDetail = new ArrayList<>();   // id detail_log tiap baris tabel
 
     private final JLabel lblRingkasan = new JLabel(" ");
     private final JProgressBar bar = new JProgressBar(0, 100);
@@ -79,7 +84,7 @@ public class MainFrame extends JFrame {
         atas.add(btnMakananBaru);
         add(atas, BorderLayout.NORTH);
 
-        add(new JScrollPane(new JTable(tableModel)), BorderLayout.CENTER);
+        add(new JScrollPane(tabel), BorderLayout.CENTER);
 
         JPanel bawah = new JPanel(new BorderLayout(8, 8));
         bawah.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -90,9 +95,15 @@ public class MainFrame extends JFrame {
         btnTarget.addActionListener(e -> hitungTarget());
         JButton btnRiwayat = new JButton("Riwayat");
         btnRiwayat.addActionListener(e -> new RiwayatFrame(pengguna).setVisible(true));
-        JPanel kanan = new JPanel(new GridLayout(0, 1, 4, 4));
+        JButton btnHapus = new JButton("Hapus Terpilih");
+        btnHapus.addActionListener(e -> hapusTerpilih());
+        JButton btnHapusSemua = new JButton("Hapus Semua Hari Ini");
+        btnHapusSemua.addActionListener(e -> hapusSemuaHariIni());
+        JPanel kanan = new JPanel(new GridLayout(0, 2, 4, 4));
         kanan.add(btnTarget);
         kanan.add(btnRiwayat);
+        kanan.add(btnHapus);
+        kanan.add(btnHapusSemua);
         bawah.add(kanan, BorderLayout.EAST);
         add(bawah, BorderLayout.SOUTH);
 
@@ -182,8 +193,10 @@ public class MainFrame extends JFrame {
     private void refresh() {
         try {
             tableModel.setRowCount(0);
-            for (Object[] baris : logDao.logHariIni(pengguna.getId())) {
-                tableModel.addRow(baris);
+            idDetail.clear();
+            for (Object[] baris : logDao.logHariIniDenganId(pengguna.getId())) {
+                idDetail.add((Integer) baris[0]);
+                tableModel.addRow(new Object[]{baris[1], baris[2], baris[3], baris[4]});
             }
 
             double total = logDao.totalKaloriHariIni(pengguna.getId());
@@ -252,6 +265,47 @@ public class MainFrame extends JFrame {
                     "Input tidak valid", JOptionPane.WARNING_MESSAGE);
         } catch (SQLException ex) {
             tampilError("Gagal menyimpan target kalori", ex);
+        }
+    }
+
+    private void hapusTerpilih() {
+        int baris = tabel.getSelectedRow();
+        if (baris < 0) {
+            JOptionPane.showMessageDialog(this, "Pilih dulu baris yang ingin dihapus di tabel.",
+                    "Belum ada pilihan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String nama = (String) tableModel.getValueAt(baris, 1);
+        int ya = JOptionPane.showConfirmDialog(this,
+                "Hapus \"" + nama + "\" dari catatan hari ini?",
+                "Konfirmasi hapus", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (ya != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            logDao.hapusDetail(idDetail.get(baris), pengguna.getId());
+            refresh();
+        } catch (SQLException ex) {
+            tampilError("Gagal menghapus catatan", ex);
+        }
+    }
+
+    private void hapusSemuaHariIni() {
+        if (tableModel.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "Belum ada catatan hari ini.");
+            return;
+        }
+        int ya = JOptionPane.showConfirmDialog(this,
+                "Hapus SEMUA catatan makanan hari ini? Tindakan ini tidak bisa dibatalkan.",
+                "Konfirmasi hapus semua", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (ya != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            logDao.hapusSemuaHariIni(pengguna.getId());
+            refresh();
+        } catch (SQLException ex) {
+            tampilError("Gagal menghapus catatan", ex);
         }
     }
 

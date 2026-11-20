@@ -16,7 +16,7 @@ public class LogDAO {
             throws SQLException {
         try (Connection c = Koneksi.getConnection()) {
             int logId = cariAtauBuatLog(c, userId, waktuMakan);
-            System.out.println("DEBUG logId = " + logId);   // sementara, hapus setelah beres
+            System.out.println("DEBUG logId = " + logId);
             String sql = "INSERT INTO detail_log (log_id, makanan_id, jumlah_porsi) VALUES (?, ?, ?)";
             try (PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.setInt(1, logId);
@@ -115,6 +115,54 @@ public class LogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getDouble(1) : 0;
             }
+        }
+    }
+    
+    public List<Object[]> logHariIniDenganId(int userId) throws SQLException {
+        String sql = "SELECT d.id, l.waktu_makan, m.nama, d.jumlah_porsi, m.kalori * d.jumlah_porsi AS kal "
+                   + "FROM log_konsumsi l "
+                   + "JOIN detail_log d ON d.log_id = l.id "
+                   + "JOIN makanan m ON m.id = d.makanan_id "
+                   + "WHERE l.user_id = ? AND l.tanggal = CURDATE() "
+                   + "ORDER BY l.id, d.id";
+        List<Object[]> baris = new ArrayList<>();
+        try (Connection c = Koneksi.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    baris.add(new Object[]{
+                            rs.getInt("id"),
+                            rs.getString("waktu_makan"),
+                            rs.getString("nama"),
+                            rs.getDouble("jumlah_porsi"),
+                            Math.round(rs.getDouble("kal"))});
+                }
+            }
+        }
+        return baris;
+    }
+
+    public void hapusDetail(int detailId, int userId) throws SQLException {
+        String sql = "DELETE d FROM detail_log d "
+                   + "JOIN log_konsumsi l ON l.id = d.log_id "
+                   + "WHERE d.id = ? AND l.user_id = ?";
+        try (Connection c = Koneksi.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, detailId);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    public int hapusSemuaHariIni(int userId) throws SQLException {
+        String sql = "DELETE d FROM detail_log d "
+                   + "JOIN log_konsumsi l ON l.id = d.log_id "
+                   + "WHERE l.user_id = ? AND l.tanggal = CURDATE()";
+        try (Connection c = Koneksi.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate();
         }
     }
     
